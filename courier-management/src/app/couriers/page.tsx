@@ -35,12 +35,15 @@ const userRoles = {
   SUPPORT: 'support'
 } as const;
 
+type UserRole = typeof userRoles[keyof typeof userRoles];
+type Permission = 'manage_couriers' | 'view_reports' | 'manage_system' | 'view_tasks' | 'update_delivery_status' | 'view_route' | 'view_issues' | 'resolve_issues' | 'contact_customer';
+
 // Rol bazlı izinler
-const rolePermissions = {
+const rolePermissions: Record<UserRole, Permission[]> = {
   [userRoles.ADMIN]: ['manage_couriers', 'view_reports', 'manage_system'],
   [userRoles.COURIER]: ['view_tasks', 'update_delivery_status', 'view_route'],
   [userRoles.SUPPORT]: ['view_issues', 'resolve_issues', 'contact_customer']
-} as const;
+};
 
 // Örnek kurye verileri
 const couriers = [
@@ -103,13 +106,13 @@ export default function Couriers() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterVehicle, setFilterVehicle] = useState('all');
-  const [userRole, setUserRole] = useState(userRoles.ADMIN); // Varsayılan olarak admin
+  const [userRole, setUserRole] = useState<UserRole>(userRoles.ADMIN); // Varsayılan olarak admin
 
   // Seçilen şehre göre ilçeleri getir
   const regions = selectedCity !== 'Tümü' ? cities[selectedCity] || [] : [];
 
   // Rol bazlı erişim kontrolü
-  const hasPermission = (permission) => {
+  const hasPermission = (permission: Permission): boolean => {
     return rolePermissions[userRole]?.includes(permission);
   };
 
@@ -120,7 +123,7 @@ export default function Couriers() {
         <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Test Modu - Rol:</span>
         <select
           value={userRole}
-          onChange={(e) => setUserRole(e.target.value)}
+          onChange={(e) => setUserRole(e.target.value as UserRole)}
           className="px-3 py-1 text-sm border border-yellow-300 rounded-md bg-white dark:bg-yellow-900/30"
         >
           {Object.values(userRoles).map((role) => (
