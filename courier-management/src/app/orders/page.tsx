@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Plus, MapPin, Package, Truck, Clock, Filter, Calendar } from 'lucide-react';
+import { Search, Plus, MapPin, Package, Truck, Clock } from 'lucide-react';
 
 // Türkiye'deki iller ve ilçeler
 const cities = {

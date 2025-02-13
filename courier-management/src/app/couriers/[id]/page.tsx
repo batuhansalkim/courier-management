@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ArrowLeft, MapPin, Phone, Mail, Star, Package, Clock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { Line } from 'react-chartjs-2';
@@ -91,9 +90,7 @@ const recentDeliveries = [
   }
 ];
 
-export default function CourierDetail({ params }: { params: { id: string } }) {
-  const [activeTab, setActiveTab] = useState('overview');
-
+export default function CourierDetail() {
   return (
     <div className="space-y-6">
       {/* Üst Başlık */}

@@ -1,175 +1,247 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Moon, Globe, Lock, User, Shield } from 'lucide-react';
-import { useTheme } from '@/context/ThemeContext';
+import { 
+  Bell, Lock, MapPin, CreditCard, 
+  Settings as SettingsIcon 
+} from 'lucide-react';
 
-const notificationSettings = [
+// Ayar kategorileri
+const settingCategories = [
   {
-    id: 'new-order',
-    label: 'Yeni Sipariş Bildirimleri',
-    description: 'Yeni bir sipariş atandığında bildirim al'
+    id: 'general',
+    name: 'Genel',
+    icon: SettingsIcon,
+    settings: [
+      {
+        id: 'language',
+        name: 'Dil',
+        description: 'Arayüz dilini değiştir',
+        type: 'select',
+        options: [
+          { value: 'tr', label: 'Türkçe' },
+          { value: 'en', label: 'English' }
+        ],
+        value: 'tr'
+      },
+      {
+        id: 'timezone',
+        name: 'Saat Dilimi',
+        description: 'Varsayılan saat dilimini ayarla',
+        type: 'select',
+        options: [
+          { value: 'Europe/Istanbul', label: 'İstanbul (UTC+3)' },
+          { value: 'Europe/London', label: 'London (UTC+0)' }
+        ],
+        value: 'Europe/Istanbul'
+      }
+    ]
   },
   {
-    id: 'status-update',
-    label: 'Durum Güncellemeleri',
-    description: 'Sipariş durumu değiştiğinde bildirim al'
+    id: 'notifications',
+    name: 'Bildirimler',
+    icon: Bell,
+    settings: [
+      {
+        id: 'email_notifications',
+        name: 'E-posta Bildirimleri',
+        description: 'Yeni siparişler ve güncellemeler için e-posta al',
+        type: 'toggle',
+        value: true
+      },
+      {
+        id: 'push_notifications',
+        name: 'Push Bildirimleri',
+        description: 'Tarayıcı bildirimleri al',
+        type: 'toggle',
+        value: true
+      }
+    ]
   },
   {
-    id: 'performance',
-    label: 'Performans Bildirimleri',
-    description: 'Haftalık performans raporları için bildirim al'
+    id: 'security',
+    name: 'Güvenlik',
+    icon: Lock,
+    settings: [
+      {
+        id: 'two_factor',
+        name: 'İki Faktörlü Doğrulama',
+        description: 'Hesap güvenliğini artır',
+        type: 'toggle',
+        value: false
+      },
+      {
+        id: 'session_timeout',
+        name: 'Oturum Zaman Aşımı',
+        description: 'Otomatik çıkış süresi',
+        type: 'select',
+        options: [
+          { value: '30', label: '30 dakika' },
+          { value: '60', label: '1 saat' },
+          { value: '120', label: '2 saat' }
+        ],
+        value: '60'
+      }
+    ]
+  },
+  {
+    id: 'maps',
+    name: 'Harita',
+    icon: MapPin,
+    settings: [
+      {
+        id: 'default_zoom',
+        name: 'Varsayılan Yakınlaştırma',
+        description: 'Harita açılış yakınlaştırma seviyesi',
+        type: 'select',
+        options: [
+          { value: '10', label: 'Şehir' },
+          { value: '13', label: 'Semt' },
+          { value: '15', label: 'Mahalle' }
+        ],
+        value: '13'
+      },
+      {
+        id: 'traffic_layer',
+        name: 'Trafik Katmanı',
+        description: 'Haritada trafik durumunu göster',
+        type: 'toggle',
+        value: true
+      }
+    ]
+  },
+  {
+    id: 'payment',
+    name: 'Ödeme',
+    icon: CreditCard,
+    settings: [
+      {
+        id: 'default_payment',
+        name: 'Varsayılan Ödeme Yöntemi',
+        description: 'Yeni siparişler için varsayılan ödeme yöntemi',
+        type: 'select',
+        options: [
+          { value: 'cash', label: 'Nakit' },
+          { value: 'credit_card', label: 'Kredi Kartı' }
+        ],
+        value: 'cash'
+      }
+    ]
   }
 ];
 
 export default function Settings() {
-  const { theme, toggleTheme } = useTheme();
-  const [notifications, setNotifications] = useState({
-    'new-order': true,
-    'status-update': true,
-    'performance': false
-  });
+  const [activeCategory, setActiveCategory] = useState('general');
+  const [settings, setSettings] = useState(
+    settingCategories.reduce((acc, category) => {
+      category.settings.forEach(setting => {
+        acc[setting.id] = setting.value;
+      });
+      return acc;
+    }, {})
+  );
 
-  const handleNotificationChange = (id: string) => {
-    setNotifications(prev => ({
+  const handleSettingChange = (settingId, value) => {
+    setSettings(prev => ({
       ...prev,
-      [id]: !prev[id]
+      [settingId]: value
     }));
   };
 
+  const renderSettingInput = (setting) => {
+    switch (setting.type) {
+      case 'toggle':
+        return (
+          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-700">
+            <input
+              type="checkbox"
+              className="peer sr-only"
+              checked={settings[setting.id]}
+              onChange={(e) => handleSettingChange(setting.id, e.target.checked)}
+            />
+            <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+              settings[setting.id] ? 'translate-x-6 bg-blue-600' : 'translate-x-1'
+            }`} />
+          </div>
+        );
+      case 'select':
+        return (
+          <select
+            value={settings[setting.id]}
+            onChange={(e) => handleSettingChange(setting.id, e.target.value)}
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+          >
+            {setting.options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Ayarlar</h1>
-        <p className="mt-1 text-gray-500 dark:text-gray-400">Hesap ve uygulama ayarlarını yönetin</p>
+        <p className="mt-1 text-gray-500 dark:text-gray-400">Sistem ayarlarını yapılandır</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        {/* Profil Ayarları */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <User className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil Ayarları</h2>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ad Soyad
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Ad Soyad"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                E-posta
-              </label>
-              <input
-                type="email"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="E-posta"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Bildirim Ayarları */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <Bell className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Bildirim Ayarları</h2>
-          </div>
-          
-          <div className="space-y-4">
-            {notificationSettings.map((setting) => (
-              <div key={setting.id} className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{setting.label}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{setting.description}</p>
-                </div>
-                <button
-                  onClick={() => handleNotificationChange(setting.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    notifications[setting.id] ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      notifications[setting.id] ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Görünüm Ayarları */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <Moon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Görünüm Ayarları</h2>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Karanlık Mod</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Arayüz temasını değiştir</p>
-            </div>
-            <button
-              onClick={toggleTheme}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                theme === 'dark' ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Kategori Menüsü */}
+        <div className="w-full lg:w-64 space-y-1">
+          {settingCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg ${
+                  activeCategory === category.id
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
-              />
+              >
+                <Icon className="h-5 w-5" />
+                {category.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ayarlar İçeriği */}
+        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl p-6">
+          {settingCategories.find(c => c.id === activeCategory)?.settings.map((setting) => (
+            <div
+              key={setting.id}
+              className="py-4 first:pt-0 last:pb-0 border-b border-gray-200 dark:border-gray-700 last:border-0"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                    {setting.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {setting.description}
+                  </p>
+                </div>
+                {renderSettingInput(setting)}
+              </div>
+            </div>
+          ))}
+
+          <div className="mt-6 flex justify-end gap-3">
+            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+              İptal
+            </button>
+            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+              Kaydet
             </button>
           </div>
         </div>
-
-        {/* Güvenlik Ayarları */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <Shield className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Güvenlik Ayarları</h2>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Mevcut Şifre
-              </label>
-              <input
-                type="password"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="••••••••"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Yeni Şifre
-              </label>
-              <input
-                type="password"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="••••••••"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          Değişiklikleri Kaydet
-        </button>
       </div>
     </div>
   );

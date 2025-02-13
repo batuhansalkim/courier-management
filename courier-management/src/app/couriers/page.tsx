@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Plus, MapPin, Phone, Mail, Filter, Calendar, Bike, FileText } from 'lucide-react';
+import { Search, Plus, MapPin, Phone, Mail } from 'lucide-react';
 
 // Türkiye'deki iller ve ilçeler
 const cities = {
@@ -102,7 +102,6 @@ export default function Couriers() {
   const [selectedRegion, setSelectedRegion] = useState('Tümü');
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
-  const [filterShift, setFilterShift] = useState('all');
   const [filterVehicle, setFilterVehicle] = useState('all');
   const [userRole, setUserRole] = useState(userRoles.ADMIN); // Varsayılan olarak admin
 

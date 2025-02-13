@@ -90,7 +90,7 @@ const deliveryTimeData = {
   ]
 };
 
-const chartOptions: ChartOptions<any> = {
+const lineChartOptions = {
   responsive: true,
   plugins: {
     legend: {
@@ -107,6 +107,36 @@ const chartOptions: ChartOptions<any> = {
       },
       ticks: {
         color: 'rgb(156, 163, 175)', // text-gray-400
+      }
+    },
+    y: {
+      grid: {
+        color: 'rgba(156, 163, 175, 0.1)',
+      },
+      ticks: {
+        color: 'rgb(156, 163, 175)',
+      }
+    }
+  }
+};
+
+const barChartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top' as const,
+      labels: {
+        color: 'rgb(156, 163, 175)',
+      }
+    },
+  },
+  scales: {
+    x: {
+      grid: {
+        color: 'rgba(156, 163, 175, 0.1)',
+      },
+      ticks: {
+        color: 'rgb(156, 163, 175)',
       }
     },
     y: {
@@ -157,14 +187,14 @@ export default function Analytics() {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Günlük Teslimat Trendi</h3>
           <div className="h-64">
-            <Line data={deliveryData} options={chartOptions} />
+            <Line data={deliveryData} options={lineChartOptions} />
           </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Teslimat Süresi Dağılımı</h3>
           <div className="h-64">
-            <Bar data={deliveryTimeData} options={chartOptions} />
+            <Bar data={deliveryTimeData} options={barChartOptions} />
           </div>
         </div>
       </div>
