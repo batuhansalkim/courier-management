@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, Plus, MapPin, Phone, Mail } from 'lucide-react';
 
 // Türkiye'deki iller ve ilçeler
-const cities = {
+const cities: { [key: string]: string[] } = {
   'İstanbul': ['Kadıköy', 'Beşiktaş', 'Üsküdar', 'Şişli', 'Maltepe', 'Ataşehir'],
   'Ankara': ['Çankaya', 'Keçiören', 'Yenimahalle', 'Mamak', 'Etimesgut'],
   'İzmir': ['Konak', 'Karşıyaka', 'Bornova', 'Buca', 'Çiğli'],
@@ -98,7 +98,7 @@ const couriers = [
 
 export default function Couriers() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState('Tümü');
+  const [selectedCity, setSelectedCity] = useState<string>('Tümü');
   const [selectedRegion, setSelectedRegion] = useState('Tümü');
   const [showAddModal, setShowAddModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
