@@ -11,8 +11,7 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend,
-  ChartOptions
+  Legend
 } from 'chart.js';
 
 ChartJS.register(
