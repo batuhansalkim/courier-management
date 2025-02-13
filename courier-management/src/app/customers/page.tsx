@@ -33,10 +33,24 @@ const customers = [
   }
 ];
 
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  totalOrders: number;
+  totalSpent: number;
+  lastOrder: string;
+  rating: number;
+  status: string;
+  notes: string;
+}
+
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
   return (
     <div className="space-y-6">

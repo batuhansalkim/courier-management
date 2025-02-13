@@ -1,142 +1,238 @@
+/// <reference types="google.maps" />
 'use client';
 
-import { useState } from 'react';
-import { GoogleMap, LoadScript, Marker, DirectionsRenderer } from '@react-google-maps/api';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Package, MapPin } from 'lucide-react';
+import { useTheme } from 'next-themes';
+
+// Google Maps bileşenlerini dinamik olarak import et
+const GoogleMap = dynamic(
+  () => import('@react-google-maps/api').then((mod) => mod.GoogleMap),
+  { ssr: false }
+);
+
+const LoadScript = dynamic(
+  () => import('@react-google-maps/api').then((mod) => mod.LoadScript),
+  { ssr: false }
+);
+
+const Marker = dynamic(
+  () => import('@react-google-maps/api').then((mod) => mod.Marker),
+  { ssr: false }
+);
+
+const DirectionsRenderer = dynamic(
+  () => import('@react-google-maps/api').then((mod) => mod.DirectionsRenderer),
+  { ssr: false }
+);
+
+interface Location {
+  lat: number;
+  lng: number;
+}
+
+interface Order {
+  id: string;
+  pickup: Location;
+  delivery: Location;
+  status: string;
+}
+
+interface Courier {
+  id: number;
+  name: string;
+  location: Location;
+  status: string;
+  currentOrder: Order;
+}
 
 const center = {
   lat: 41.0082,
   lng: 28.9784 // İstanbul koordinatları
 };
 
-const couriers = [
+// Örnek kurye verileri
+const courierData: Courier[] = [
   {
     id: 1,
     name: 'Ahmet K.',
-    location: { lat: 41.0082, lng: 28.9784 },
+    location: {
+      lat: 41.0082,
+      lng: 28.9784
+    },
+    status: 'active',
     currentOrder: {
-      id: 'ORD001',
-      pickup: { lat: 41.0151, lng: 28.9795, address: 'Taksim, İstanbul' },
-      delivery: { lat: 41.0099, lng: 28.9619, address: 'Beşiktaş, İstanbul' },
-      status: 'Yolda'
+      id: 'ORD-001',
+      pickup: {
+        lat: 41.0151,
+        lng: 28.9795
+      },
+      delivery: {
+        lat: 41.0219,
+        lng: 28.9806
+      },
+      status: 'in_progress'
     }
   },
   {
     id: 2,
-    name: 'Mehmet Y.',
-    location: { lat: 41.0055, lng: 28.9744 },
+    name: 'Mehmet S.',
+    location: {
+      lat: 41.0151,
+      lng: 28.9795
+    },
+    status: 'active',
     currentOrder: {
-      id: 'ORD002',
-      pickup: { lat: 41.0082, lng: 28.9784, address: 'Şişli, İstanbul' },
-      delivery: { lat: 41.0091, lng: 28.9783, address: 'Mecidiyeköy, İstanbul' },
-      status: 'Teslimatta'
+      id: 'ORD-002',
+      pickup: {
+        lat: 41.0219,
+        lng: 28.9806
+      },
+      delivery: {
+        lat: 41.0082,
+        lng: 28.9784
+      },
+      status: 'in_progress'
     }
   }
 ];
 
 export default function Routes() {
-  const [selectedCourier, setSelectedCourier] = useState(null);
-  const [directions, setDirections] = useState(null);
+  const [selectedCourier, setSelectedCourier] = useState<Courier | null>(null);
+  const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
+  const { theme } = useTheme();
+  const [isClient, setIsClient] = useState(false);
+  const [couriers, setCouriers] = useState<Courier[]>([]);
 
-  const handleCourierSelect = (courier) => {
+  useEffect(() => {
+    setIsClient(true);
+    setCouriers(courierData);
+  }, []);
+
+  const handleCourierSelect = (courier: Courier) => {
+    if (!isClient || !window.google) return;
+    
     setSelectedCourier(courier);
     // Google Maps Directions API'sini kullanarak rota çizimi
-    const directionsService = new google.maps.DirectionsService();
+    const directionsService = new window.google.maps.DirectionsService();
 
     directionsService.route(
       {
-        origin: courier.currentOrder.pickup,
-        destination: courier.currentOrder.delivery,
-        travelMode: google.maps.TravelMode.DRIVING,
+        origin: new window.google.maps.LatLng(courier.location.lat, courier.location.lng),
+        destination: new window.google.maps.LatLng(
+          courier.currentOrder.delivery.lat,
+          courier.currentOrder.delivery.lng
+        ),
+        waypoints: [
+          {
+            location: new window.google.maps.LatLng(
+              courier.currentOrder.pickup.lat,
+              courier.currentOrder.pickup.lng
+            ),
+            stopover: true
+          }
+        ],
+        travelMode: window.google.maps.TravelMode.DRIVING
       },
       (result, status) => {
-        if (status === google.maps.DirectionsStatus.OK) {
+        if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
         }
       }
     );
   };
 
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Rota Takibi</h1>
-          <p className="mt-1 text-gray-500 dark:text-gray-400">Kuryelerin anlık konumları ve rotaları</p>
-        </div>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">Rota Yönetimi</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Kurye Listesi */}
-        <div className="lg:col-span-1 space-y-4">
-          {couriers.map((courier) => (
-            <div
-              key={courier.id}
-              onClick={() => handleCourierSelect(courier)}
-              className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                selectedCourier?.id === courier.id
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                    <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+          <h2 className="text-lg font-semibold mb-4">Kuryeler</h2>
+          <div className="space-y-4">
+            {couriers.map((courier) => (
+              <div
+                key={courier.id}
+                className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                  selectedCourier?.id === courier.id
+                    ? 'bg-blue-50 dark:bg-blue-900'
+                    : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                }`}
+                onClick={() => handleCourierSelect(courier)}
+              >
+                <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">{courier.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Sipariş: {courier.currentOrder.id}</p>
+                    <h3 className="font-medium">{courier.name}</h3>
+                    <div className="flex items-center mt-2 text-sm text-gray-600 dark:text-gray-300">
+                      <Package className="w-4 h-4 mr-1" />
+                      <span>Sipariş: {courier.currentOrder.id}</span>
+                    </div>
+                    <div className="flex items-center mt-1 text-sm text-gray-600 dark:text-gray-300">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span>
+                        Konum: {courier.location.lat.toFixed(4)},{' '}
+                        {courier.location.lng.toFixed(4)}
+                      </span>
+                    </div>
+                  </div>
+                  <div
+                    className={`px-2 py-1 rounded text-xs ${
+                      courier.status === 'active'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-100'
+                    }`}
+                  >
+                    {courier.status === 'active' ? 'Aktif' : 'Pasif'}
                   </div>
                 </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  courier.currentOrder.status === 'Yolda'
-                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
-                    : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                }`}>
-                  {courier.currentOrder.status}
-                </span>
               </div>
-
-              {selectedCourier?.id === courier.id && (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Package className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600 dark:text-gray-300">Alış: {courier.currentOrder.pickup.address}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-600 dark:text-gray-300">Teslimat: {courier.currentOrder.delivery.address}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Harita */}
         <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
+          <LoadScript 
+            id="google-maps-script"
+            googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY"
+          >
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '600px' }}
               center={center}
               zoom={13}
               options={{
-                styles: theme === 'dark' ? darkMapStyle : [],
-                streetViewControl: false,
-                mapTypeControl: false
+                styles: theme === 'dark' ? mapDarkStyle : [],
+                disableDefaultUI: true,
+                zoomControl: true,
+                mapTypeControl: true,
+                scaleControl: true,
+                streetViewControl: true,
+                rotateControl: true,
+                fullscreenControl: true
               }}
             >
+              {/* Kurye konumları */}
               {couriers.map((courier) => (
                 <Marker
                   key={courier.id}
-                  position={courier.location}
+                  position={{
+                    lat: courier.location.lat,
+                    lng: courier.location.lng
+                  }}
                   icon={{
-                    url: '/courier-marker.png', // Kurye için özel marker ikonu
-                    scaledSize: new google.maps.Size(40, 40)
+                    url: '/courier-marker.png',
+                    scaledSize: new window.google.maps.Size(32, 32)
                   }}
                 />
               ))}
+
+              {/* Rota çizimi */}
               {directions && <DirectionsRenderer directions={directions} />}
             </GoogleMap>
           </LoadScript>
@@ -146,15 +242,93 @@ export default function Routes() {
   );
 }
 
-// Dark mode harita stili
-const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+// Harita karanlık mod stili
+const mapDarkStyle = [
   {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d59563" }]
+    elementType: 'geometry',
+    stylers: [{ color: '#242f3e' }]
   },
-  // ... Daha fazla stil eklenebilir
-]; 
+  {
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#242f3e' }]
+  },
+  {
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#746855' }]
+  },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#263c3f' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#6b9a76' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#38414e' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#212a37' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9ca5b3' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#746855' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#1f2835' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#f3d19c' }]
+  },
+  {
+    featureType: 'transit',
+    elementType: 'geometry',
+    stylers: [{ color: '#2f3948' }]
+  },
+  {
+    featureType: 'transit.station',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#17263c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#515c6d' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#17263c' }]
+  }
+];

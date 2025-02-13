@@ -22,6 +22,8 @@ const formatDate = (dateString: string) => {
 };
 
 // Sipariş durumları
+type OrderStatus = typeof orderStatuses[keyof typeof orderStatuses];
+
 const orderStatuses = {
   PENDING: 'pending',
   PREPARING: 'preparing',
@@ -43,32 +45,61 @@ const orderStatusLabels = {
   [orderStatuses.RETURNED]: 'İade Edildi'
 } as const;
 
+interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Courier {
+  id: number;
+  name: string;
+  phone: string;
+}
+
+interface Order {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  deliveryAddress: string;
+  pickupAddress: string;
+  status: OrderStatus;
+  createdAt: string;
+  estimatedDeliveryTime: string;
+  assignedCourier: Courier | null;
+  items: OrderItem[];
+  price: number;
+  paymentMethod: string;
+  notes: string;
+}
+
 // Örnek sipariş verileri
-const orders = [
+const orders: Order[] = [
   {
     id: 'ORD-001',
     customerName: 'Mehmet Yılmaz',
-    customerPhone: '0532 XXX XX XX',
-    deliveryAddress: 'Ataşehir, İstanbul',
-    pickupAddress: 'Kadıköy, İstanbul',
+    customerPhone: '0533 XXX XX XX',
+    deliveryAddress: 'Kadıköy, İstanbul',
+    pickupAddress: 'Üsküdar, İstanbul',
     status: orderStatuses.PENDING,
     createdAt: '2024-02-20T10:30:00',
     estimatedDeliveryTime: '2024-02-20T11:30:00',
     assignedCourier: null,
     items: [
-      { name: 'Paket 1', size: 'Orta', weight: '2.5kg' }
+      { id: 'PKG-001', name: 'Paket 1', quantity: 1, price: 100 }
     ],
     price: 150,
     paymentMethod: 'Nakit',
-    notes: 'Dikkatli taşınması rica olunur'
+    notes: 'Dikkatli taşınması gerekiyor'
   },
   {
     id: 'ORD-002',
     customerName: 'Ayşe Demir',
-    customerPhone: '0533 XXX XX XX',
+    customerPhone: '0534 XXX XX XX',
     deliveryAddress: 'Beşiktaş, İstanbul',
     pickupAddress: 'Şişli, İstanbul',
-    status: orderStatuses.ON_WAY,
+    status: orderStatuses.PREPARING,
     createdAt: '2024-02-20T09:15:00',
     estimatedDeliveryTime: '2024-02-20T10:15:00',
     assignedCourier: {
@@ -77,7 +108,7 @@ const orders = [
       phone: '0532 XXX XX XX'
     },
     items: [
-      { name: 'Paket 1', size: 'Büyük', weight: '5kg' }
+      { id: 'PKG-002', name: 'Paket 1', quantity: 1, price: 200 }
     ],
     price: 200,
     paymentMethod: 'Kredi Kartı',
@@ -135,14 +166,14 @@ export default function Orders() {
   const [selectedCity, setSelectedCity] = useState('Tümü');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   // Sipariş durumuna göre stil belirleme
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: OrderStatus) => {
     const styles = {
       [orderStatuses.PENDING]: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
       [orderStatuses.PREPARING]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -256,7 +287,7 @@ export default function Orders() {
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Paket Detayları</p>
                     {order.items.map((item, index) => (
                       <p key={index} className="text-sm text-gray-500 dark:text-gray-400">
-                        {item.name} - {item.size} ({item.weight})
+                        {item.name} - {item.quantity} adet ({item.price} TL)
                       </p>
                     ))}
                   </div>

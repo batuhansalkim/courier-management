@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { 
   Bell, Lock, MapPin, CreditCard, 
-  Settings as SettingsIcon 
+  Settings as SettingsIcon,
+  LucideIcon 
 } from 'lucide-react';
 
 // Ayar kategorileri
-const settingCategories = [
+const settingCategories: SettingCategory[] = [
   {
     id: 'general',
     name: 'Genel',
@@ -130,6 +131,26 @@ const settingCategories = [
   }
 ];
 
+interface Setting {
+  id: string;
+  name: string;
+  description: string;
+  type: 'toggle' | 'select';
+  options?: { value: string; label: string }[];
+  value: string | boolean;
+}
+
+interface SettingCategory {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  settings: Setting[];
+}
+
+interface SettingsState {
+  [key: string]: string | boolean;
+}
+
 export default function Settings() {
   const [activeCategory, setActiveCategory] = useState('general');
   const [settings, setSettings] = useState(
@@ -138,17 +159,17 @@ export default function Settings() {
         acc[setting.id] = setting.value;
       });
       return acc;
-    }, {})
+    }, {} as SettingsState)
   );
 
-  const handleSettingChange = (settingId, value) => {
+  const handleSettingChange = (settingId: string, value: string | boolean) => {
     setSettings(prev => ({
       ...prev,
       [settingId]: value
     }));
   };
 
-  const renderSettingInput = (setting) => {
+  const renderSettingInput = (setting: Setting) => {
     switch (setting.type) {
       case 'toggle':
         return (
@@ -156,7 +177,7 @@ export default function Settings() {
             <input
               type="checkbox"
               className="peer sr-only"
-              checked={settings[setting.id]}
+              checked={settings[setting.id] as boolean}
               onChange={(e) => handleSettingChange(setting.id, e.target.checked)}
             />
             <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
@@ -167,11 +188,11 @@ export default function Settings() {
       case 'select':
         return (
           <select
-            value={settings[setting.id]}
+            value={settings[setting.id] as string}
             onChange={(e) => handleSettingChange(setting.id, e.target.value)}
             className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
           >
-            {setting.options.map((option) => (
+            {setting.options?.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

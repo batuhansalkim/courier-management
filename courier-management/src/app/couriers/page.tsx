@@ -38,6 +38,43 @@ const userRoles = {
 type UserRole = typeof userRoles[keyof typeof userRoles];
 type Permission = 'manage_couriers' | 'view_reports' | 'manage_system' | 'view_tasks' | 'update_delivery_status' | 'view_route' | 'view_issues' | 'resolve_issues' | 'contact_customer';
 
+interface TrainingStatus {
+  name: string;
+  completed: boolean;
+  date: string | null;
+}
+
+interface PerformanceMetrics {
+  onTimeDeliveryRate: number;
+  customerSatisfaction: number;
+  averageDeliveryTime: number;
+  monthlyDeliveries: number;
+}
+
+interface Courier {
+  id: number;
+  name: string;
+  photo: string;
+  city: string;
+  region: string;
+  phone: string;
+  email: string;
+  status: string;
+  rating: number;
+  totalDeliveries: number;
+  joinDate: string;
+  shift: string;
+  vehicleType: string;
+  documents: string[];
+  salary: string;
+  role?: UserRole;
+  emergencyContact?: string;
+  trainingStatus?: TrainingStatus[];
+  performanceMetrics?: PerformanceMetrics;
+  assignedZones?: string[];
+  certifications?: string[];
+}
+
 // Rol bazlı izinler
 const rolePermissions: Record<UserRole, Permission[]> = {
   [userRoles.ADMIN]: ['manage_couriers', 'view_reports', 'manage_system'],
@@ -46,7 +83,7 @@ const rolePermissions: Record<UserRole, Permission[]> = {
 };
 
 // Örnek kurye verileri
-const couriers = [
+const couriers: Courier[] = [
   {
     id: 1,
     name: 'Ahmet Yılmaz',
@@ -73,7 +110,7 @@ const couriers = [
     performanceMetrics: {
       onTimeDeliveryRate: 95,
       customerSatisfaction: 4.8,
-      averageDeliveryTime: 25, // dakika
+      averageDeliveryTime: 25,
       monthlyDeliveries: 280
     },
     assignedZones: ['Kadıköy-1', 'Kadıköy-2', 'Ataşehir-1'],
@@ -278,25 +315,25 @@ export default function Couriers() {
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Zamanında Teslimat</p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    %{courier.performanceMetrics.onTimeDeliveryRate}
+                    {courier.performanceMetrics?.onTimeDeliveryRate ? `%${courier.performanceMetrics.onTimeDeliveryRate}` : 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Müşteri Memnuniyeti</p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {courier.performanceMetrics.customerSatisfaction}/5
+                    {courier.performanceMetrics?.customerSatisfaction ? `${courier.performanceMetrics.customerSatisfaction}/5` : 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Ort. Teslimat Süresi</p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {courier.performanceMetrics.averageDeliveryTime} dk
+                    {courier.performanceMetrics?.averageDeliveryTime ? `${courier.performanceMetrics.averageDeliveryTime} dk` : 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Aylık Teslimat</p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {courier.performanceMetrics.monthlyDeliveries}
+                    {courier.performanceMetrics?.monthlyDeliveries ?? 'N/A'}
                   </p>
                 </div>
               </div>
@@ -306,7 +343,7 @@ export default function Couriers() {
             <div className="mt-4 p-4">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Eğitim Durumu</h4>
               <div className="space-y-2">
-                {courier.trainingStatus.map((training, index) => (
+                {courier.trainingStatus?.map((training, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {training.completed ? (
@@ -316,7 +353,7 @@ export default function Couriers() {
                       )}
                       <span className="text-sm text-gray-700 dark:text-gray-300">{training.name}</span>
                     </div>
-                    {training.completed && (
+                    {training.completed && training.date && (
                       <span className="text-xs text-gray-500 dark:text-gray-400">
                         {new Date(training.date).toLocaleDateString('tr-TR')}
                       </span>
@@ -330,7 +367,7 @@ export default function Couriers() {
             <div className="mt-4 p-4 border-t border-gray-100 dark:border-gray-700">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Sertifikalar</h4>
               <div className="flex flex-wrap gap-2">
-                {courier.certifications.map((cert, index) => (
+                {courier.certifications?.map((cert, index) => (
                   <span
                     key={index}
                     className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-full"
@@ -342,7 +379,7 @@ export default function Couriers() {
             </div>
 
             {/* Acil Durum İletişim */}
-            {hasPermission('manage_couriers') && (
+            {hasPermission('manage_couriers') && courier.emergencyContact && (
               <div className="mt-4 p-4 border-t border-gray-100 dark:border-gray-700">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Acil Durum İletişim</h4>
                 <p className="text-sm text-gray-700 dark:text-gray-300">{courier.emergencyContact}</p>
@@ -353,7 +390,7 @@ export default function Couriers() {
             <div className="mt-4 p-4 border-t border-gray-100 dark:border-gray-700">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Atanmış Bölgeler</h4>
               <div className="flex flex-wrap gap-2">
-                {courier.assignedZones.map((zone, index) => (
+                {courier.assignedZones?.map((zone, index) => (
                   <span
                     key={index}
                     className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-full"

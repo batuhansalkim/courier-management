@@ -19,16 +19,48 @@ const ticketStatusLabels = {
   [ticketStatuses.CLOSED]: 'Kapalı'
 } as const;
 
+interface Agent {
+  id: number;
+  name: string;
+}
+
+interface Message {
+  id: number;
+  content: string;
+  sender: string;
+  timestamp: string;
+}
+
+interface Customer {
+  name: string;
+  email: string;
+}
+
+interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  assignedTo: Agent | null;
+  customer: Customer;
+  messages: Message[];
+}
+
+type TicketStatus = typeof ticketStatuses[keyof typeof ticketStatuses];
+
 // Örnek destek talepleri
-const tickets = [
+const tickets: Ticket[] = [
   {
-    id: 'TIC-001',
-    title: 'Teslimat gecikmesi',
-    description: 'Sipariş 2 saat gecikmeli geldi, müşteri şikayetçi.',
+    id: 'TKT-001',
+    title: 'Teslimat Gecikmesi',
+    description: 'Siparişim 2 gündür bekleniyor',
     status: ticketStatuses.OPEN,
     priority: 'high',
-    createdAt: '2024-02-20T10:30:00',
-    updatedAt: '2024-02-20T10:30:00',
+    createdAt: '2024-02-19T10:30:00',
+    updatedAt: '2024-02-19T10:30:00',
     assignedTo: null,
     customer: {
       name: 'Mehmet Yılmaz',
@@ -37,20 +69,20 @@ const tickets = [
     messages: [
       {
         id: 1,
-        content: 'Sipariş 2 saat gecikmeli geldi, müşteri çok rahatsız.',
+        content: 'Siparişim neden gecikiyor?',
         sender: 'customer',
-        timestamp: '2024-02-20T10:30:00'
+        timestamp: '2024-02-19T10:30:00'
       }
     ]
   },
   {
-    id: 'TIC-002',
-    title: 'Yanlış teslimat adresi',
-    description: 'Kurye yanlış adrese teslimat yapmış.',
+    id: 'TKT-002',
+    title: 'Yanlış Adres',
+    description: 'Teslimat adresi yanlış girilmiş',
     status: ticketStatuses.IN_PROGRESS,
     priority: 'medium',
-    createdAt: '2024-02-20T09:15:00',
-    updatedAt: '2024-02-20T09:45:00',
+    createdAt: '2024-02-19T09:15:00',
+    updatedAt: '2024-02-19T09:45:00',
     assignedTo: {
       id: 1,
       name: 'Ali Demir'
@@ -62,15 +94,15 @@ const tickets = [
     messages: [
       {
         id: 1,
-        content: 'Kurye siparişi yanlış adrese teslim etmiş.',
+        content: 'Adresimi güncellemek istiyorum',
         sender: 'customer',
-        timestamp: '2024-02-20T09:15:00'
+        timestamp: '2024-02-19T09:15:00'
       },
       {
         id: 2,
-        content: 'Kurye ile iletişime geçildi, sipariş doğru adrese yönlendirildi.',
-        sender: 'support',
-        timestamp: '2024-02-20T09:45:00'
+        content: 'Size yardımcı olabilirim',
+        sender: 'agent',
+        timestamp: '2024-02-19T09:45:00'
       }
     ]
   }
@@ -96,11 +128,11 @@ export default function Support() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [activeTab, setActiveTab] = useState('tickets'); // 'tickets' veya 'faq'
 
   // Destek talebi durumuna göre stil belirleme
-  const getStatusStyle = (status) => {
+  const getStatusStyle = (status: TicketStatus) => {
     const styles = {
       [ticketStatuses.OPEN]: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
       [ticketStatuses.IN_PROGRESS]: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
