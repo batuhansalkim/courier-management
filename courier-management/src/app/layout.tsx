@@ -19,7 +19,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={inter.className}>
+      <head>
+        <link rel="stylesheet" href="/_next/static/css/app/globals.css" />
+      </head>
+      <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <Navbar />
