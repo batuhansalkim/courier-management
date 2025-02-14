@@ -17,7 +17,11 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.fallback = { fs: false };
     return config;
-  }
+  },
+  // Stil dosyaları için ek yapılandırmalar
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true
 }
 
 module.exports = nextConfig

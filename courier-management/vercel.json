@@ -13,6 +13,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_BASE_URL": "https://kurye-ten.vercel.app"
+    "NEXT_PUBLIC_BASE_URL": "https://courier-management-bsbs.vercel.app"
   }
 }
