@@ -5,7 +5,11 @@ import Navbar from "@/components/common/Navbar";
 import Sidebar from "@/components/common/Sidebar";
 import { ThemeProvider } from "@/context/ThemeContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Kurye Yönetim Sistemi",
@@ -19,10 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <head>
-        <link rel="stylesheet" href="/_next/static/css/app/globals.css" />
-      </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={inter.className}>
         <ThemeProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
             <Navbar />
