@@ -10,6 +10,13 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true
+  },
+  experimental: {
+    optimizeCss: true
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false };
+    return config;
   }
 }
 
