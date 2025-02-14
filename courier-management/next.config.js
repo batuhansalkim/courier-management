@@ -11,6 +11,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  output: 'standalone',
+  poweredByHeader: false,
+  images: {
+    domains: ['images.unsplash.com'],
+  },
 }
 
 module.exports = nextConfig
