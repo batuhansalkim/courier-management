@@ -90,6 +90,16 @@ const recentDeliveries = [
   }
 ];
 
+// Generate static params for all courier IDs
+export async function generateStaticParams() {
+  // You should replace this with your actual courier IDs from your data source
+  const courierIds = [1, 2, 3, 4, 5]; // Example static IDs
+  
+  return courierIds.map((id) => ({
+    id: id.toString(),
+  }));
+}
+
 export default function CourierDetail() {
   return (
     <div className="space-y-6">
