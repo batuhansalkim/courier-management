@@ -16,7 +16,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-white border-r min-h-screen">
+    <aside className="w-64 bg-card border-r border-border min-h-screen">
       <div className="p-4">
         <nav className="space-y-1">
           {menuItems.map((item) => {
@@ -27,14 +27,14 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg ${
+                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-primary/10 text-primary dark:bg-primary/20'
+                    : 'text-muted-foreground hover:bg-muted/50'
                 }`}
               >
                 <Icon className={`h-5 w-5 mr-3 ${
-                  isActive ? 'text-blue-700' : 'text-gray-400'
+                  isActive ? 'text-primary' : 'text-muted-foreground'
                 }`} />
                 {item.label}
               </Link>
@@ -44,4 +44,4 @@ export default function Sidebar() {
       </div>
     </aside>
   );
-} 
+}

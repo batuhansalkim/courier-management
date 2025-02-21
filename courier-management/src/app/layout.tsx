@@ -23,13 +23,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+          <div className="min-h-screen bg-background transition-colors duration-200">
             <Navbar />
             <div className="flex">
               <Sidebar />
-              <main className="flex-1 p-8">{children}</main>
+              <main className="flex-1 p-8 mx-auto max-w-7xl">{children}</main>
             </div>
           </div>
         </ThemeProvider>

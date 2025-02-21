@@ -53,6 +53,34 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        blue: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          400: '#60a5fa',
+          600: '#2563eb',
+          900: '#1e3a8a',
+        },
+        green: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          400: '#4ade80',
+          600: '#16a34a',
+          900: '#14532d',
+        },
+        purple: {
+          50: '#faf5ff',
+          100: '#f3e8ff',
+          400: '#c084fc',
+          600: '#9333ea',
+          900: '#581c87',
+        },
+        orange: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          400: '#fb923c',
+          600: '#ea580c',
+          900: '#7c2d12',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -79,4 +107,9 @@ module.exports = {
   future: {
     hoverOnlyWhenSupported: true,
   },
+  safelist: [
+    {
+      pattern: /(bg|text)-(blue|green|purple|orange)-(50|100|400|600|900)/,
+    },
+  ],
 }
