@@ -8,7 +8,8 @@ import { ThemeProvider } from "@/context/ThemeContext";
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -22,8 +23,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+    <html lang="tr" suppressHydrationWarning className={inter.className}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className="antialiased">
         <ThemeProvider>
           <div className="min-h-screen bg-background transition-colors duration-200">
             <Navbar />
