@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: true,
   swcMinify: true,
   images: {
@@ -11,13 +12,6 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true
-  },
-  experimental: {
-    optimizeCss: true
-  },
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false };
-    return config;
   }
 }
 
