@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: 'standalone', // 'export' yerine 'standalone' kullanalım
   reactStrictMode: true,
   swcMinify: true,
   images: {
@@ -12,9 +12,6 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true
-  },
-  experimental: {
-    optimizeCss: false
   }
 }
 
